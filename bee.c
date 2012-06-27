@@ -21,15 +21,12 @@ timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y) {
         y->tv_sec -= nsec;
     }
 
-    /* Compute the time remaining to wait.
-       tv_usec is certainly positive. */
     result->tv_sec = x->tv_sec - y->tv_sec;
     result->tv_usec = x->tv_usec - y->tv_usec;
 
-    /* Return 1 if result is negative. */
-    // return x->tv_sec < y->tv_sec;
+    double sign = x->tv_sec < y->tv_sec ? -1.0 : 1.0;
 
-    return ((double)result->tv_sec) + ((double)result->tv_usec / 1000000);
+    return sign * ((double)result->tv_sec) + ((double)result->tv_usec / 1000000);
 }
 
 // roundDown10 rounds a number down to the nearest power of 10.
