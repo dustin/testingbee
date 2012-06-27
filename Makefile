@@ -1,4 +1,5 @@
 CFLAGS=-O3
+LDFLAGS=
 
 all: example
 	./example
@@ -9,6 +10,6 @@ bee.a: bee.o
 bee.o: bee.c bee.h Makefile
 
 example: bee.a example.o
-	$(CC) -o $@ example.o bee.a
+	$(CC) -o $@ example.o bee.a $(LDFLAGS)
 
 example.o: example.c Makefile
