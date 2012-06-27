@@ -12,7 +12,8 @@
 #define max(a, b) (a > b ? a : b)
 
 static double
-timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y) {
+timeval_subtract(struct timeval *x, struct timeval *y) {
+    struct timeval tmp;
     double rv;
     if (x->tv_usec < y->tv_usec) {
         int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
@@ -25,12 +26,12 @@ timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y) {
         y->tv_sec -= nsec;
     }
 
-    result->tv_sec = x->tv_sec - y->tv_sec;
-    result->tv_usec = x->tv_usec - y->tv_usec;
+    tmp.tv_sec = x->tv_sec - y->tv_sec;
+    tmp.tv_usec = x->tv_usec - y->tv_usec;
 
     double sign = x->tv_sec < y->tv_sec ? -1.0 : 1.0;
 
-    return sign * ((double)result->tv_sec) + ((double)result->tv_usec / 1000000);
+    return sign * ((double)tmp.tv_sec) + ((double)tmp.tv_usec / 1000000);
 }
 
 // roundDown10 rounds a number down to the nearest power of 10.
@@ -96,9 +97,9 @@ void bench(const char *name, bench_func f) {
 
 void stop_timer(bee_t *b) {
     if (b->timing) {
-        struct timeval finish, diff;
+        struct timeval finish;
         gettimeofday(&finish, NULL);
-        b->duration += timeval_subtract(&diff, &finish, &b->start);
+        b->duration += timeval_subtract(&finish, &b->start);
         b->timing = false;
     }
 }
