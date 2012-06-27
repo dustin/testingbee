@@ -89,8 +89,8 @@ void bench(const char *name, bench_func f) {
     }
 
     if (b.success) {
-        printf("Ran %s\tat %d us/op\tfor %d ops in\t%fs\n",
-               name, (int)(b.duration / b.n), b.n, b.duration);
+        printf("Ran %s\tat %d ns/op\tfor %d ops in\t%fs\n",
+               name, (int)(1000000000.0 * b.duration / b.n), b.n, b.duration);
     } else {
         printf("FAIL %s after %fs\n", name, b.duration);
     }
