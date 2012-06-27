@@ -4,7 +4,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
+#include <time.h>
+#include <assert.h>
 
 #include "bee.h"
 
@@ -13,15 +14,23 @@
 
 #define NANOSECOND 1000000000
 
-static uint64_t
-timeval_subtract(struct timeval *x, struct timeval *y) {
-    uint64_t nsx, nsy;
+#ifdef __MACH__
+#include <mach/mach_time.h>
 
-    nsx = (x->tv_sec * NANOSECOND) + (x->tv_usec * 1000);
-    nsy = (y->tv_sec * NANOSECOND) + (y->tv_usec * 1000);
-
-    return nsx - nsy;
+// OS X doesn't have clock_gettime
+static uint64_t hrtime() {
+    return mach_absolute_time();
 }
+
+#else
+
+static uint64_t hrtime() {
+    struct timespec spec;
+    clock_gettime(CLOCK_MONOTONIC, &spec);
+    return (uint64_t)(spec.tv_sec) * NANOSECOND + spec.tv_nsec;
+}
+
+#endif
 
 // roundDown10 rounds a number down to the nearest power of 10.
 static int roundDown10(int n) {
@@ -63,7 +72,7 @@ static uint64_t run(bench_func f, bee_t *b) {
 }
 
 void bench(const char *name, bench_func f) {
-    bee_t b = {1, true, true, 0, {0, 0}};
+    bee_t b = {1, true, true, 0, 0};
     double diff;
 
     b.duration = run(f, &b);
@@ -90,23 +99,21 @@ void bench(const char *name, bench_func f) {
 
 void stop_timer(bee_t *b) {
     if (b->timing) {
-        struct timeval finish;
-        gettimeofday(&finish, NULL);
-        b->duration += timeval_subtract(&finish, &b->start);
+        b->duration += hrtime() - b->start;
         b->timing = false;
     }
 }
 
 void start_timer(bee_t *b) {
     if (!b->timing) {
-        gettimeofday(&b->start, NULL);
+        b->start = hrtime();
         b->timing = true;
     }
 }
 
 void reset_timer(bee_t *b) {
     b->duration = 0;
-    gettimeofday(&b->start, NULL);
+    b->start = hrtime();
 }
 
 void fail_test(bee_t *b) {

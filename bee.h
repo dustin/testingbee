@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <sys/time.h>
+#include <time.h>
 #include <setjmp.h>
 
 typedef struct {
@@ -12,7 +12,7 @@ typedef struct {
 
     bool timing;
     uint64_t duration;
-    struct timeval start;
+    uint64_t start;
     jmp_buf env;
 } bee_t;
 
