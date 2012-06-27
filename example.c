@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "bee.h"
@@ -53,8 +55,8 @@ static int ebin_cmp(sized_buf *e1, sized_buf *e2)
 
 void test_small(int (*f)(sized_buf *, sized_buf *), bee_t *b) {
     sized_buf e1, e2;
-    e1.buf = "aaaaaaaaaaaaaaaaaaaaaavalue";
-    e2.buf = "aaaaaaaaaaaaaaaaaaaaavvalue";
+    e1.buf = strdup("aaaaaaaaaaaaaaaaaaaaaavalue");
+    e2.buf = strdup("aaaaaaaaaaaaaaaaaaaaavvalue");
     e1.size = strlen(e1.buf);
     e2.size = strlen(e2.buf);
 
@@ -64,6 +66,9 @@ void test_small(int (*f)(sized_buf *, sized_buf *), bee_t *b) {
             fail_test(b);
         }
     }
+
+    free(e1.buf);
+    free(e2.buf);
 }
 
 void small_buf(bee_t *b) {
