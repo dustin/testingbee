@@ -11,27 +11,16 @@
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)
 
-static double
+#define NANOSECOND 1000000000
+
+static uint64_t
 timeval_subtract(struct timeval *x, struct timeval *y) {
-    struct timeval tmp;
-    double rv;
-    if (x->tv_usec < y->tv_usec) {
-        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-        y->tv_usec -= 1000000 * nsec;
-        y->tv_sec += nsec;
-    }
-    if (x->tv_usec - y->tv_usec > 1000000) {
-        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
-        y->tv_usec += 1000000 * nsec;
-        y->tv_sec -= nsec;
-    }
+    uint64_t nsx, nsy;
 
-    tmp.tv_sec = x->tv_sec - y->tv_sec;
-    tmp.tv_usec = x->tv_usec - y->tv_usec;
+    nsx = (x->tv_sec * NANOSECOND) + (x->tv_usec * 1000);
+    nsy = (y->tv_sec * NANOSECOND) + (y->tv_usec * 1000);
 
-    double sign = x->tv_sec < y->tv_sec ? -1.0 : 1.0;
-
-    return sign * ((double)tmp.tv_sec) + ((double)tmp.tv_usec / 1000000);
+    return nsx - nsy;
 }
 
 // roundDown10 rounds a number down to the nearest power of 10.
@@ -62,7 +51,7 @@ static int roundUp(int n)  {
 	return 10 * base;
 }
 
-static double run(bench_func f, bee_t *b) {
+static uint64_t run(bench_func f, bee_t *b) {
     double rv;
     if (setjmp(b->env) == 0) {
         reset_timer(b);
@@ -79,7 +68,7 @@ void bench(const char *name, bench_func f) {
 
     b.duration = run(f, &b);
 
-    while (b.duration < 1 && b.success) {
+    while (b.duration < NANOSECOND && b.success) {
         int last = b.n;
         int usperop = b.duration / b.n;
 
@@ -90,9 +79,11 @@ void bench(const char *name, bench_func f) {
 
     if (b.success) {
         printf("Ran %s\tat %d ns/op\tfor %d ops in\t%fs\n",
-               name, (int)(1000000000.0 * b.duration / b.n), b.n, b.duration);
+               name, (int)(b.duration / b.n), b.n,
+               (double)(b.duration) / NANOSECOND);
     } else {
-        printf("FAIL %s after %fs\n", name, b.duration);
+        printf("FAIL %s after %fs\n", name,
+               (double)(b.duration) / NANOSECOND);
     }
     fflush(stdout);
 }

@@ -11,7 +11,7 @@ typedef struct {
     bool success;
 
     bool timing;
-    double duration;
+    uint64_t duration;
     struct timeval start;
     jmp_buf env;
 } bee_t;
