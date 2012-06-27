@@ -60,7 +60,10 @@ void test_small(int (*f)(sized_buf *, sized_buf *), bee_t *b) {
 
     for (int i = 0; i < b->n; i++) {
         int rv = f(&e1, &e2);
-        assert(rv < 0);
+        if (rv >= 0) {
+            fail_test(b);
+            return;
+        }
     }
 }
 
@@ -72,6 +75,13 @@ void small_buf2(bee_t *b) {
     test_small(ebin_cmp2, b);
 }
 
+void fail_me(bee_t *b) {
+    for(int i = 0; i < b->n; i++) {
+        fail_test(b);
+        return;
+    }
+}
+
 //
 // The buck starts here.
 //
@@ -79,4 +89,5 @@ void small_buf2(bee_t *b) {
 int main(int argc, char **argv) {
     bench("small buf", small_buf);
     bench("small buf2", small_buf2);
+    bench("Failing test", fail_me);
 }
