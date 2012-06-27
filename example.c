@@ -74,9 +74,13 @@ void small_buf2(bee_t *b) {
     test_small(ebin_cmp2, b);
 }
 
+// This is an example of a failing test.  It can run for a bit
+// successfully and then decide it's not working correctly.
 void fail_me(bee_t *b) {
     for(int i = 0; i < b->n; i++) {
-        fail_test(b);
+        if (i > 100000) {
+            fail_test(b);
+        }
     }
 }
 

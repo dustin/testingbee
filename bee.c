@@ -68,8 +68,8 @@ static double run(bench_func f, bee_t *b) {
         reset_timer(b);
         start_timer(b);
         f(b);
-        stop_timer(b);
     }
+    stop_timer(b);
     return b->duration;
 }
 
@@ -92,7 +92,7 @@ void bench(const char *name, bench_func f) {
         printf("Ran %s\tat %d us/op\tfor %d ops in\t%fs\n",
                name, (int)(b.duration / b.n), b.n, b.duration);
     } else {
-        printf("FAIL %s\n", name);
+        printf("FAIL %s after %fs\n", name, b.duration);
     }
     fflush(stdout);
 }
