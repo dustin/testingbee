@@ -1,3 +1,7 @@
+// Some of this code was written using my brain.  Much of it was
+// ported directly from the go sources because those guys figured out
+// all the important details.
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
