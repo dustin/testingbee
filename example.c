@@ -62,7 +62,6 @@ void test_small(int (*f)(sized_buf *, sized_buf *), bee_t *b) {
         int rv = f(&e1, &e2);
         if (rv >= 0) {
             fail_test(b);
-            return;
         }
     }
 }
@@ -78,7 +77,6 @@ void small_buf2(bee_t *b) {
 void fail_me(bee_t *b) {
     for(int i = 0; i < b->n; i++) {
         fail_test(b);
-        return;
     }
 }
 

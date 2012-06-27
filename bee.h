@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <setjmp.h>
 
 typedef struct {
     int n;
@@ -12,6 +13,7 @@ typedef struct {
     bool timing;
     double duration;
     struct timeval start;
+    jmp_buf env;
 } bee_t;
 
 typedef void(*bench_func)(bee_t*);

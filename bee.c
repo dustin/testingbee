@@ -64,10 +64,12 @@ static int roundUp(int n)  {
 
 static double run(bench_func f, bee_t *b) {
     double rv;
-    reset_timer(b);
-    start_timer(b);
-    f(b);
-    stop_timer(b);
+    if (setjmp(b->env) == 0) {
+        reset_timer(b);
+        start_timer(b);
+        f(b);
+        stop_timer(b);
+    }
     return b->duration;
 }
 
@@ -118,4 +120,5 @@ void reset_timer(bee_t *b) {
 
 void fail_test(bee_t *b) {
     b->success = false;
+    longjmp(b->env, 1);
 }
