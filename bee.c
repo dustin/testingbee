@@ -14,6 +14,7 @@
 #define max(a, b) (a > b ? a : b)
 
 #define NANOSECOND 1000000000
+#define MAXN 1000000000
 
 #ifdef __MACH__
 #include <mach/mach_time.h>
@@ -35,34 +36,39 @@ static uint64_t hrtime() {
 
 // roundDown10 rounds a number down to the nearest power of 10.
 static int roundDown10(int n) {
-	int tens = 0;
-	// tens = floor(log_10(n))
-	while (n > 10) {
-            n = n / 10;
-            tens++;
-	}
-	// result = 10^tens
+    int tens = 0;
+    // tens = floor(log_10(n))
+    while (n >= 10) {
+        n = n / 10;
+        tens++;
+    }
+    // result = 10^tens
     int result = 1;
     for (int i = 0; i < tens; i++) {
         result *= 10;
     }
-	return result;
+    return result;
 }
 
-// roundUp rounds x up to a number of the form [1eX, 2eX, 5eX].
+// roundUp rounds x up to a number of the form [1eX, 2eX, 3eX, 5eX].
 static int roundUp(int n)  {
-	int base = roundDown10(n);
-	if (n < (2 * base)) {
-		return 2 * base;
-	}
-	if (n < (5 * base)) {
-		return 5 * base;
-	}
-	return 10 * base;
+    int base = roundDown10(n);
+    if (n <= base) {
+        return base;
+    }
+    if (n <= (2 * base)) {
+        return 2 * base;
+    }
+    if (n <= (3 * base)) {
+        return 3 * base;
+    }
+    if (n <= (5 * base)) {
+        return 5 * base;
+    }
+    return 10 * base;
 }
 
 static uint64_t run(bench_func f, bee_t *b) {
-    double rv;
     if (setjmp(b->env) == 0) {
         reset_timer(b);
         start_timer(b);
@@ -74,15 +80,13 @@ static uint64_t run(bench_func f, bee_t *b) {
 
 void bench(const char *name, bench_func f) {
     bee_t b = {1, true, true, 0, 0};
-    double diff;
 
     b.duration = run(f, &b);
 
-    while (b.duration < NANOSECOND && b.success) {
+    while (b.success && b.duration < NANOSECOND && b.n < MAXN) {
         int last = b.n;
-        int usperop = b.duration / b.n;
 
-        b.n = roundUp(max(min(b.n+(b.n/2), 100*last), last+1));
+        b.n = roundUp(max(min(b.n+(b.n/5), 100*last), last+1));
 
         b.duration = run(f, &b);
     }
